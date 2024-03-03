@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+body{
+   width : 100vw ; 
+   height : 100vh ; 
+   padding: 2rem; 
+   background-image: url(https://source.unsplash.com/random/?citynight) ; 
+   background-size: contain;
+   
+}
+#bookCard:hover {
+   width: 100.5%;
+   height: 100.5%;
+}
+section {
+   height: 80vh;
+   overflow-y: auto;
+
+ }
+ 
+ section::-webkit-scrollbar {
+   width: 6px;
+ }
+ 
+ section::-webkit-scrollbar-thumb {
+   background-color: transparent;
+ }
+ 
+ #bink{
+  width: calc(70% - 200px) ; 
+ }
+
+ @media screen and (max-width: 600px) {
+  #bink {
+     width: 70vw;
+  }
+}
