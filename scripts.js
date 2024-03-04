@@ -21,8 +21,6 @@ function nav_routing()
   })
 }
 
-
-
 let root = document.getElementById("root");
 
 function main() {
@@ -273,11 +271,12 @@ document.getElementById('bbt').addEventListener('click', function (event) {
 }
 function purchase_comp(element) {
     console.log(element.volumeInfo.title);
+
     let title = element.volumeInfo.title;
     let date = element.volumeInfo.publishedDate;
     let link = element.volumeInfo.infoLink;
     let auth = element.volumeInfo.authors[0] ; 
-    let isbn = [] 
+    let isbn = element.volumeInfo.industryIdentifiers ;
     let small = "" ;
     if ("description" in element.volumeInfo) {
       let description = element.volumeInfo.description ; 
@@ -391,8 +390,8 @@ function purchase_comp(element) {
                  <div class="form-group col-md-12 ">
                      <label for="inputState">ISBN</label>
                      <select id="inputState" class="form-control rounded-lg hover:border-2 border-sky-500">
-                       <option>0-345-24223-8</option>
-                       <option>978-92-95055-02-5</option>
+                       <option>${isbn[0].identifier}</option>
+                       <option>${isbn[1].identifier}</option>
                      </select>
                    </div>
                  <div class="col-md-6 h-[10px]"> 
@@ -412,37 +411,89 @@ function search()
    nav_routing() ; 
    let keyword;
    btn = document.getElementById("getter");
+   let vat = document.getElementById('button') 
    console.log("working till here ") ;
    btn.addEventListener("click", (event) => {
       event.preventDefault();
-      console.log("working till here ") ;
-      let list = document.getElementById("add");
-      list.innerHTML = "" ; 
-       keyword = document.getElementById("search").value;    
-       s = formatter(keyword) ; 
-       let booksinfo = [];
-       let run = fetch(`https://www.googleapis.com/books/v1/volumes?q=${s}`);
-       run.then((response) => {
-          return response.json();
-       }).then((value) => {
-          console.log(value);
-          booksinfo = value.items;
-       }).then(() => {
-          get_val(booksinfo);
-          for(let i =0 ; i<booksinfo.length ; i++)
-          {
-            console.log("high") ; 
-            let tt = document.querySelectorAll("#ok") ; 
-            tt[i].addEventListener("click" , ()=>{
-              purchase(booksinfo[i]) ; 
-            })
+      if(vat.value == "isbn"){
+
+        if (vat.value == "isbn") {
+          console.log("working till here ");
+          let list = document.getElementById("add");
+          list.innerHTML = "";
+          keyword = document.getElementById("search").value;
+          
+          // Check if the input is numeric
+          if (!isNaN(keyword)) {
+              s = formatter(keyword);
+              let booksinfo = [];
+              let run = fetch(`https://www.googleapis.com/books/v1/volumes?q=${s}`);
+              
+              run.then((response) => {
+                  return response.json();
+              }).then((value) => {
+                  console.log(value);
+                  booksinfo = value.items;
+              }).then(() => {
+                 
+                  let boot = false ; 
+                  for (let i = 0; i < booksinfo.length; i++) {
+                      console.log(booksinfo[i].volumeInfo.industryIdentifiers[0].identifier) ; 
+                      console.log("high");
+                      if (booksinfo[i].volumeInfo.industryIdentifier) {
+                          if (booksinfo[i].volumeInfo.industryIdentifiers[0].identifier == keyword || booksinfo[i].volumeInfo.industryIdentifiers[1].identifier == keyword) {
+                            boot = true ;
+                            get_val([booksinfo[i]]);
+                              let tt = document.querySelectorAll("#ok");
+                              tt[i].addEventListener("click", () => {
+                                  purchase(booksinfo[i]);
+                              });
+                              break ; 
+                          }
+                      }
+                  }
+                  if(!boot) alert("404 not found ") ; 
+                
+              });
+          } else {
+              // Handle the case when the input is not numeric
+              alert("Please enter a numeric value for ISBN search.");
           }
-       }).catch((error) => {
-          console.error('Error fetching data:', error);
-       });
-       document.body.style.backgroundImage = `url(https://source.unsplash.com/random/?${formatter2(keyword)})` ;
-       document.body.style.backgroundSize = "cover" ; 
-       
+      }
+          
+       } 
+      else{
+        console.log("working till here ") ;
+        let list = document.getElementById("add");
+        list.innerHTML = "" ; 
+         keyword = document.getElementById("search").value;    
+         s = formatter(keyword) ; 
+         let booksinfo = [];
+         let run = fetch(`https://www.googleapis.com/books/v1/volumes?q=${s}`);
+         run.then((response) => {
+            return response.json();
+         }).then((value) => {
+            console.log(value);
+            booksinfo = value.items;
+         }).then(() => {
+            get_val(booksinfo);
+            for(let i =0 ; i<booksinfo.length ; i++)
+            {
+              console.log(booksinfo[i].volumeInfo.industryIdentifiers[0].identifier) ;
+              console.log("high") ; 
+              let tt = document.querySelectorAll("#ok") ; 
+              tt[i].addEventListener("click" , ()=>{
+                purchase(booksinfo[i]) ; 
+              })
+            }
+         }).catch((error) => {
+            console.error('Error fetching data:', error);
+         });
+         document.body.style.backgroundImage = `url(https://source.unsplash.com/random/?${formatter2(keyword)})` ;
+         document.body.style.backgroundSize = "cover" ; 
+         
+      }
+
    });
 }
 function searchcomp()
@@ -452,7 +503,11 @@ function searchcomp()
       <div class="max-w-5xl m-auto">
       <form class="flex items-center space-x-4 mb-8">
           <input id="search" type="text" id="searchInput" class="p-2 border border-gray-300 rounded-md w-full" placeholder="Search for a book...">
-          <button type = "submit" id = "getter" class="bg-blue-500 text-white px-4 py-2 rounded-md">Search</button>
+          <button id = "getter" class="bg-blue-500 text-white px-4 py-2 rounded-md "> SEARCH </button>
+          <select  id = "button" class="bg-green-500 text-white px-4 py-2 rounded-md ">
+            <option value = "gen" class = "p-4">GENERAL </option>
+            <option value = "isbn">ISBN </option>
+          </select>
        </form>
    
        <div class = " " >
